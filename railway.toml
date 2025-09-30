@@ -1,0 +1,17 @@
+# Railway deployment configuration for drug-surfactant API
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  port = 8000
+  healthcheck = "/health"
+  
+[env]
+  PYTHONPATH = "/app"
+  OPENTRONS_PROTOCOL_API_VERSION = "2.21"
+  DRUG_SURFACTANT_API_URL = "https://${{ RAILWAY_PUBLIC_DOMAIN }}"
+
+# Railway-specific settings
+[settings]
+  name = "drug-surfactant-api"
+  region = "us-west1"
