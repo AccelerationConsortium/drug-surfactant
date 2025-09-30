@@ -86,6 +86,12 @@ def conc_to_vol(df, drug_stock_conc, drug_total_volume, surfactant_stock_conc, s
     df_vol['dmso'] = drug_total_volume - df_vol['drug']
 
     df_vol['water'] = surfactant_total_volume - df_vol[s_cols].sum(axis=1)
+    
+    # Check for invalid volumes (negative values indicate infeasible experiments)
+    if (df_vol['dmso'] < 0).any() or (df_vol['water'] < 0).any():
+        raise ValueError("Invalid experimental parameters: negative volumes calculated. "
+                        "This indicates concentrations are too high for the available stock solutions.")
+    
     df_vol.loc[:, df_vol.columns != 'trial_index'] *= 1000 # convert to uL
 
     return df_vol
@@ -96,6 +102,61 @@ def design_to_conc_to_vol(df, drug_stock_conc=50, drug_total_volume=0.12, surfac
     df_vol = conc_to_vol(df_conc, drug_stock_conc, drug_total_volume, surfactant_stock_conc, surfactant_total_volume)
 
     return df_conc, df_vol
+
+
+def safe_complete_trial(ax_client, trial_index, parameterization, drug_stock_conc=50, drug_total_volume=0.12, 
+                        surfactant_stock_conc=50, surfactant_total_volume=1):
+    """
+    Safely complete a trial with error handling for failed experiments.
+    
+    If the experiment fails due to invalid parameters (e.g., concentrations too high),
+    the trial is marked as failed instead of completed.
+    
+    Args:
+        ax_client: The Ax client instance
+        trial_index: Index of the trial to complete
+        parameterization: Dictionary of parameter values for the trial
+        drug_stock_conc: Stock concentration of drug (mg/mL)
+        drug_total_volume: Total volume for drug solution (mL)
+        surfactant_stock_conc: Stock concentration of surfactant (mg/mL)
+        surfactant_total_volume: Total volume for surfactant solution (mL)
+        
+    Returns:
+        True if trial completed successfully, False if trial failed
+    """
+    try:
+        # Extract surfactant parameters
+        s_params = {f"s{i}": parameterization[f"s{i}"] for i in range(1, 13)}
+        
+        # Run virtual experiment
+        results = virtual_exp(**s_params)
+        
+        # Create a temporary dataframe to validate volumes can be calculated
+        temp_df = pd.DataFrame([{
+            'trial_index': trial_index,
+            **s_params,
+            'surfactant_conc': parameterization['surfactant_conc'],
+            'drug_conc': parameterization['drug_conc']
+        }])
+        
+        # Validate that volumes can be calculated (this will raise ValueError if invalid)
+        df_conc, df_vol = design_to_conc_to_vol(
+            temp_df, 
+            drug_stock_conc=drug_stock_conc,
+            drug_total_volume=drug_total_volume,
+            surfactant_stock_conc=surfactant_stock_conc,
+            surfactant_total_volume=surfactant_total_volume
+        )
+        
+        # If we get here, the experiment is valid
+        ax_client.complete_trial(trial_index=trial_index, raw_data=results)
+        return True
+        
+    except (ValueError, KeyError, Exception) as e:
+        # Mark trial as failed if any error occurs
+        ax_client.mark_trial_failed(trial_index=trial_index)
+        print(f"Trial {trial_index} marked as FAILED. Reason: {str(e)}")
+        return False
 
 
 def upload_file_to_robot(local_file_path, remote_file_name):
