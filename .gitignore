@@ -3,3 +3,24 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# MQTT certificates and keys
+*.pem
+*.crt
+*.key
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+.DS_Store?
+ehthumbs.db
