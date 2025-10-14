@@ -1,0 +1,17 @@
+{
+  "mqtt_host": null,
+  "mqtt_port": 8883,
+  "mqtt_username": null,
+  "mqtt_password": null,
+  "experiment_timeout": 300,
+  "max_retries": 3,
+  "log_level": "INFO",
+  "results_directory": "orchestrator_results",
+  "drugs": ["IBP", "LOV", "DCF", "GLV"],
+  "n_trials_per_drug": 1,
+  "use_bayesian_optimization": true,
+  "topics": {
+    "experiment_publish": "lab/experiments/new",
+    "result_subscribe": "lab/experiments/result"
+  }
+}
