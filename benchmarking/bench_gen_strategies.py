@@ -3,7 +3,7 @@ import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.modelbridge.factory import Generators
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
-from botorch.acquisition import ExpectedImprovement
+from botorch.acquisition import LogExpectedImprovement
 
 from ax.service.utils.best_point import get_trace
 
@@ -36,7 +36,7 @@ for j, seed in enumerate(seed_list):
                     model=model,
                     num_trials=-1,
                     max_parallelism=3,
-                    model_kwargs={"botorch_acqf_class": ExpectedImprovement} if model == Generators.BOTORCH_MODULAR else {},
+                    model_kwargs={"botorch_acqf_class": LogExpectedImprovement} if model == Generators.BOTORCH_MODULAR else {},
                 ),
             ]
         )

@@ -3,7 +3,7 @@ import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.modelbridge.factory import Generators
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
-from botorch.acquisition import ExpectedImprovement, UpperConfidenceBound, LogExpectedImprovement
+from botorch.acquisition import UpperConfidenceBound, LogExpectedImprovement
 
 from ax.service.utils.best_point import get_trace
 
@@ -14,7 +14,7 @@ obj1_name = 'ackley'
 
 model = Generators.SAASBO
 
-acqf_list = [ExpectedImprovement, UpperConfidenceBound, LogExpectedImprovement]
+acqf_list = [LogExpectedImprovement, UpperConfidenceBound]
 
 traces = []
 for acqf in acqf_list:
@@ -75,13 +75,12 @@ objective = 'ackley'
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 
-for acqf, name in zip([trace for trace in traces], ["EI", "UCB", "LEI"]):
+for acqf, name in zip([trace for trace in traces], ["LEI", "UCB"]):
 
     mean = np.mean(acqf, axis=0)
     std = np.std(acqf, axis=0)
 
-    color = '#0033FF' if name == "EI" else '#FF3300'
-    color = '#00FF33' if name == "LEI" else color  # green for LEI
+    color = '#00FF33' if name == "LEI" else '#FF3300'  # green for LEI, red for UCB
 
     ax.plot(mean, color=color, label=f"{name} Mean")
     ax.fill_between(
