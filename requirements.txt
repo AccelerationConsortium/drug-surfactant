@@ -1,2 +1,3 @@
 ax-platform>=1,<2
 paho-mqtt>=2.1.0
+opentrons>=7.0.0  # For protocol simulation and testing
