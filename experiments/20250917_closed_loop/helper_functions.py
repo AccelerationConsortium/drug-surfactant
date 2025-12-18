@@ -84,12 +84,25 @@ normalize_drug_properties_dict = {
 def optimizer_init():
     
     # generation strategy
+    # NOTE: The strategy automatically transitions between steps based on num_trials.
+    # - Sobol: Space-filling quasi-random sampling for initial exploration
+    # - BOTORCH_MODULAR: Bayesian optimization with Gaussian processes
+    # - SAASBO: Sparse Axis-Aligned Subspace BO for high-dimensional problems
+    #
+    # For Human-in-the-Loop (HiTL) workflows with prior data:
+    # - When loading an experiment with existing trials, you can skip Sobol and go
+    #   directly to BOTORCH_MODULAR or SAASBO by passing bopt=1 or bopt=2 to run_optimizer()
+    # - This is safe when sufficient prior data is available (typically 10+ trials)
+    # - The run_optimizer() function will advance the generation strategy accordingly
+    #
+    # IMPORTANT: Only advance steps when you have prior data. Starting from scratch
+    # should always use Sobol (bopt=0) for proper space-filling initialization.
     gs = GenerationStrategy(
         steps=[
             GenerationStep(
                 model=Generators.SOBOL,
                 num_trials=1000,  # how many sobol trials to perform (rule of thumb: 2 * number of params)
-                model_kwargs={"seed": 0},
+                model_kwargs={"seed": 0},  # Fixed seed ensures reproducible Sobol sequence
             ),
             GenerationStep(
 
@@ -479,8 +492,45 @@ def run_optimizer(current_iteration, drug_list, bopt,n_trials=1):
         data_so_far = add_drug_names(data_so_far)
         best_concs = lowest_so_far(data_so_far, drug_list)
 
-    # 2. 切换到对应的 generation step（sobol/bo）
-    ax_client.generation_strategy._curr = ax_client.generation_strategy._steps[bopt]
+    # 2. Log current generation step for verification and handle step transitions
+    # For HiTL (Human-in-the-Loop) workflows with prior data, you may want to skip
+    # Sobol and go directly to BOTORCH_MODULAR or SAASBO. The bopt parameter allows
+    # this by advancing the generation strategy when prior data is available.
+    gs = ax_client.generation_strategy
+    curr_step_index = gs.curr_index
+    curr_model_name = gs._curr.model if gs._curr else "None"
+    
+    print(f"\n{'='*80}")
+    print(f"Generation Strategy Status:")
+    print(f"  Current step index: {curr_step_index}")
+    print(f"  Current model: {curr_model_name}")
+    print(f"  Total trials so far: {len(ax_client.experiment.trials)}")
+    print(f"  Requested step (bopt): {bopt}")
+    
+    # Handle step advancement for HiTL workflows with prior data
+    # If we have prior data and want to skip Sobol, advance to the requested step
+    if bopt != curr_step_index and len(ax_client.experiment.trials) > 0:
+        # Only advance if we have sufficient data and are moving forward
+        if bopt > curr_step_index:
+            print(f"  INFO: HiTL mode - advancing from step {curr_step_index} to step {bopt}")
+            print(f"        Prior data available: {len(ax_client.experiment.trials)} trials")
+            # Advance the generation strategy by updating the current step
+            # This is safe when we have prior data and want to skip initialization
+            try:
+                gs._curr = gs._steps[bopt]
+                gs._curr_index = bopt
+                print(f"  SUCCESS: Advanced to step {bopt} ({gs._curr.model})")
+            except (IndexError, AttributeError) as e:
+                print(f"  WARNING: Could not advance to step {bopt}: {e}")
+                print(f"           Continuing with current step {curr_step_index}")
+        else:
+            print(f"  WARNING: Cannot move backward from step {curr_step_index} to {bopt}")
+            print(f"           Continuing with current step to preserve model state.")
+    elif bopt != curr_step_index:
+        print(f"  INFO: No prior data - staying at step {curr_step_index}")
+        print(f"        Will naturally transition after completing {gs._curr.num_trials} trials")
+    
+    print(f"{'='*80}\n")
 
     trials_data = []
     count = 0
@@ -513,7 +563,7 @@ def run_optimizer(current_iteration, drug_list, bopt,n_trials=1):
         print(f"Update constraints (drug={drug})：surf_1_conc+surf_2_conc <= {best_conc -2}，>=1")
 
         # 6. 清除 BoTorch/SAASBO 的拟合缓存，确保使用最新约束重新 fit
-        gs = ax_client.generation_strategy
+        # This is necessary because we're changing constraints dynamically per drug
         curr = gs._curr
         # BoTorchAdapter：清除每个 model_spec 的 _fitted_model
         if hasattr(curr, "model_specs"):
@@ -527,11 +577,17 @@ def run_optimizer(current_iteration, drug_list, bopt,n_trials=1):
             gs._model = None
 
         # 7. 用单条 get_next_trial(force=True) 循环生成 n_trials
-        for _ in range(n_trials):
+        for trial_num in range(n_trials):
             parameters, trial_index = ax_client.get_next_trial(
                 fixed_features=drug_features,
                 force=True,
             )
+            
+            # Log which model generated this trial for verification
+            current_model = gs._curr.model if gs._curr else "Unknown"
+            print(f"  Trial {trial_index} (drug {drug}, {trial_num+1}/{n_trials}): "
+                  f"Generated by {current_model}")
+            
             trials_data.append({
                 "trial_index": trial_index,
                 "drug_name":   drug,
@@ -542,6 +598,49 @@ def run_optimizer(current_iteration, drug_list, bopt,n_trials=1):
     df_design = pd.DataFrame(trials_data)
     df_design['surf_conc'] = df_design['surf_1_conc'] + df_design['surf_2_conc']
     df_design['obj_surf_conc'] = None
+
+    # Check for duplicate suggestions (should not happen with proper Ax usage)
+    # Only check surfactant and drug concentration parameters (drug properties are fixed per drug)
+    param_cols = ['surf_1', 'surf_1_conc', 'surf_2', 'surf_2_conc', 'drug_conc']
+    # Filter to only existing columns
+    param_cols = [col for col in param_cols if col in df_design.columns]
+    
+    if param_cols:
+        duplicates_in_batch = df_design[param_cols].duplicated(keep=False)
+        if duplicates_in_batch.any():
+            # Count unique parameter sets that have duplicates
+            num_duplicate_sets = len(df_design[duplicates_in_batch][param_cols].drop_duplicates())
+            print(f"\n{'!'*80}")
+            print(f"WARNING: Found {num_duplicate_sets} unique parameter set(s) with duplicates in this batch!")
+            print(f"This suggests the generation strategy may not be working correctly.")
+            print(f"Duplicate rows:")
+            print(df_design[duplicates_in_batch][['trial_index', 'drug_name'] + param_cols])
+            print(f"{'!'*80}\n")
+        
+        # Check for duplicates against historical data
+        # Use trial_index to identify which trials are new
+        all_trials_df = ax_client.get_trials_data_frame()
+        new_trial_indices = set(df_design['trial_index'].values)
+        historical_trials = all_trials_df[~all_trials_df['trial_index'].isin(new_trial_indices)]
+        
+        if len(historical_trials) > 0:
+            # Use merge to efficiently find duplicates
+            historical_params = historical_trials[param_cols] if all(col in historical_trials.columns for col in param_cols) else None
+            if historical_params is not None:
+                # Create a merged dataframe to find matching parameter sets
+                new_params = df_design[['trial_index'] + param_cols]
+                merged = new_params.merge(
+                    historical_params,
+                    on=param_cols,
+                    how='inner'
+                )
+                
+                if len(merged) > 0:
+                    print(f"\n{'!'*80}")
+                    print(f"WARNING: Found {len(merged)} new trial(s) that duplicate historical trials!")
+                    print(f"This suggests Sobol sequence was restarted incorrectly.")
+                    print(f"Duplicate trial indices: {merged['trial_index'].tolist()}")
+                    print(f"{'!'*80}\n")
 
     # 9. 保存状态
     ax_client.save_to_json_file(f"{optimizer_file_path}{current_iteration}.json")
