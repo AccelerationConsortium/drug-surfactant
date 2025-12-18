@@ -1,0 +1,659 @@
+{
+    "_type": "AxClient",
+    "experiment": {
+        "__type": "Experiment",
+        "name": "drug_surfactant",
+        "description": null,
+        "experiment_type": null,
+        "search_space": {
+            "__type": "SearchSpace",
+            "parameters": [
+                {
+                    "__type": "RangeParameter",
+                    "name": "Drug_MW",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "FLOAT"
+                    },
+                    "lower": 0.0,
+                    "upper": 1.0,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                },
+                {
+                    "__type": "RangeParameter",
+                    "name": "Drug_LogP",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "FLOAT"
+                    },
+                    "lower": 0.0,
+                    "upper": 1.0,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                },
+                {
+                    "__type": "RangeParameter",
+                    "name": "Drug_TPSA",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "FLOAT"
+                    },
+                    "lower": 0.0,
+                    "upper": 1.0,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                },
+                {
+                    "__type": "ChoiceParameter",
+                    "is_ordered": false,
+                    "is_task": false,
+                    "name": "surf_1",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "STRING"
+                    },
+                    "values": [
+                        "s1",
+                        "s2",
+                        "s3",
+                        "s4",
+                        "s5",
+                        "s6",
+                        "s7",
+                        "s8"
+                    ],
+                    "is_fidelity": false,
+                    "target_value": null,
+                    "dependents": null,
+                    "sort_values": false
+                },
+                {
+                    "__type": "RangeParameter",
+                    "name": "surf_1_conc",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "INT"
+                    },
+                    "lower": 0,
+                    "upper": 100,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                },
+                {
+                    "__type": "ChoiceParameter",
+                    "is_ordered": false,
+                    "is_task": false,
+                    "name": "surf_2",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "STRING"
+                    },
+                    "values": [
+                        "s1",
+                        "s2",
+                        "s3",
+                        "s4",
+                        "s5",
+                        "s6",
+                        "s7",
+                        "s8"
+                    ],
+                    "is_fidelity": false,
+                    "target_value": null,
+                    "dependents": null,
+                    "sort_values": false
+                },
+                {
+                    "__type": "RangeParameter",
+                    "name": "surf_2_conc",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "INT"
+                    },
+                    "lower": 0,
+                    "upper": 100,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                },
+                {
+                    "__type": "RangeParameter",
+                    "name": "drug_conc",
+                    "parameter_type": {
+                        "__type": "ParameterType",
+                        "name": "FLOAT"
+                    },
+                    "lower": 0.0,
+                    "upper": 25.0,
+                    "log_scale": false,
+                    "logit_scale": false,
+                    "digits": null,
+                    "is_fidelity": false,
+                    "target_value": null
+                }
+            ],
+            "parameter_constraints": [
+                {
+                    "__type": "ParameterConstraint",
+                    "constraint_dict": {
+                        "surf_1_conc": 1.0,
+                        "surf_2_conc": 1.0
+                    },
+                    "bound": 99.0
+                },
+                {
+                    "__type": "ParameterConstraint",
+                    "constraint_dict": {
+                        "surf_1_conc": -1.0,
+                        "surf_2_conc": -1.0
+                    },
+                    "bound": -1.0
+                }
+            ]
+        },
+        "optimization_config": {
+            "__type": "OptimizationConfig",
+            "objective": {
+                "__type": "Objective",
+                "metric": {
+                    "name": "obj_surf_conc",
+                    "lower_is_better": true,
+                    "properties": {},
+                    "__type": "Metric"
+                },
+                "minimize": true
+            },
+            "outcome_constraints": [],
+            "risk_measure": null
+        },
+        "tracking_metrics": [],
+        "runner": null,
+        "status_quo": null,
+        "time_created": {
+            "__type": "datetime",
+            "value": "2025-07-29 09:22:09.866337"
+        },
+        "trials": {},
+        "is_test": false,
+        "data_by_trial": {},
+        "properties": {
+            "immutable_search_space_and_opt_config": true
+        },
+        "default_data_type": {
+            "__type": "DataType",
+            "name": "DATA"
+        }
+    },
+    "generation_strategy": {
+        "__type": "GenerationStrategy",
+        "db_id": null,
+        "name": "Sobol+BoTorch+SAASBO",
+        "steps": [
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "SOBOL"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {
+                    "seed": 0
+                },
+                "model_gen_kwargs": {},
+                "index": 0,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_1",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            },
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "BOTORCH_MODULAR"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {},
+                "model_gen_kwargs": {},
+                "index": 1,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_2",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            },
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "SAASBO"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {},
+                "model_gen_kwargs": {},
+                "index": 2,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_3",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            }
+        ],
+        "curr_index": 0,
+        "generator_runs": [],
+        "had_initialized_model": false,
+        "experiment": {
+            "__type": "Experiment",
+            "name": "drug_surfactant",
+            "description": null,
+            "experiment_type": null,
+            "search_space": {
+                "__type": "SearchSpace",
+                "parameters": [
+                    {
+                        "__type": "RangeParameter",
+                        "name": "Drug_MW",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "FLOAT"
+                        },
+                        "lower": 0.0,
+                        "upper": 1.0,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    },
+                    {
+                        "__type": "RangeParameter",
+                        "name": "Drug_LogP",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "FLOAT"
+                        },
+                        "lower": 0.0,
+                        "upper": 1.0,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    },
+                    {
+                        "__type": "RangeParameter",
+                        "name": "Drug_TPSA",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "FLOAT"
+                        },
+                        "lower": 0.0,
+                        "upper": 1.0,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    },
+                    {
+                        "__type": "ChoiceParameter",
+                        "is_ordered": false,
+                        "is_task": false,
+                        "name": "surf_1",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "STRING"
+                        },
+                        "values": [
+                            "s1",
+                            "s2",
+                            "s3",
+                            "s4",
+                            "s5",
+                            "s6",
+                            "s7",
+                            "s8"
+                        ],
+                        "is_fidelity": false,
+                        "target_value": null,
+                        "dependents": null,
+                        "sort_values": false
+                    },
+                    {
+                        "__type": "RangeParameter",
+                        "name": "surf_1_conc",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "INT"
+                        },
+                        "lower": 0,
+                        "upper": 100,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    },
+                    {
+                        "__type": "ChoiceParameter",
+                        "is_ordered": false,
+                        "is_task": false,
+                        "name": "surf_2",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "STRING"
+                        },
+                        "values": [
+                            "s1",
+                            "s2",
+                            "s3",
+                            "s4",
+                            "s5",
+                            "s6",
+                            "s7",
+                            "s8"
+                        ],
+                        "is_fidelity": false,
+                        "target_value": null,
+                        "dependents": null,
+                        "sort_values": false
+                    },
+                    {
+                        "__type": "RangeParameter",
+                        "name": "surf_2_conc",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "INT"
+                        },
+                        "lower": 0,
+                        "upper": 100,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    },
+                    {
+                        "__type": "RangeParameter",
+                        "name": "drug_conc",
+                        "parameter_type": {
+                            "__type": "ParameterType",
+                            "name": "FLOAT"
+                        },
+                        "lower": 0.0,
+                        "upper": 25.0,
+                        "log_scale": false,
+                        "logit_scale": false,
+                        "digits": null,
+                        "is_fidelity": false,
+                        "target_value": null
+                    }
+                ],
+                "parameter_constraints": [
+                    {
+                        "__type": "ParameterConstraint",
+                        "constraint_dict": {
+                            "surf_1_conc": 1.0,
+                            "surf_2_conc": 1.0
+                        },
+                        "bound": 99.0
+                    },
+                    {
+                        "__type": "ParameterConstraint",
+                        "constraint_dict": {
+                            "surf_1_conc": -1.0,
+                            "surf_2_conc": -1.0
+                        },
+                        "bound": -1.0
+                    }
+                ]
+            },
+            "optimization_config": {
+                "__type": "OptimizationConfig",
+                "objective": {
+                    "__type": "Objective",
+                    "metric": {
+                        "name": "obj_surf_conc",
+                        "lower_is_better": true,
+                        "properties": {},
+                        "__type": "Metric"
+                    },
+                    "minimize": true
+                },
+                "outcome_constraints": [],
+                "risk_measure": null
+            },
+            "tracking_metrics": [],
+            "runner": null,
+            "status_quo": null,
+            "time_created": {
+                "__type": "datetime",
+                "value": "2025-07-29 09:22:09.866337"
+            },
+            "trials": {},
+            "is_test": false,
+            "data_by_trial": {},
+            "properties": {
+                "immutable_search_space_and_opt_config": true
+            },
+            "default_data_type": {
+                "__type": "DataType",
+                "name": "DATA"
+            }
+        },
+        "nodes": [
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "SOBOL"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {
+                    "seed": 0
+                },
+                "model_gen_kwargs": {},
+                "index": 0,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_1",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            },
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "BOTORCH_MODULAR"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {},
+                "model_gen_kwargs": {},
+                "index": 1,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_2",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            },
+            {
+                "__type": "GenerationStep",
+                "model": {
+                    "__type": "Generators",
+                    "name": "SAASBO"
+                },
+                "num_trials": 1000,
+                "min_trials_observed": 0,
+                "completion_criteria": [],
+                "max_parallelism": null,
+                "use_update": false,
+                "enforce_num_trials": true,
+                "model_kwargs": {},
+                "model_gen_kwargs": {},
+                "index": 2,
+                "should_deduplicate": false,
+                "transition_criteria": [
+                    {
+                        "threshold": 1000,
+                        "only_in_statuses": null,
+                        "not_in_statuses": [
+                            {
+                                "__type": "TrialStatus",
+                                "name": "FAILED"
+                            },
+                            {
+                                "__type": "TrialStatus",
+                                "name": "ABANDONED"
+                            }
+                        ],
+                        "transition_to": "GenerationStep_3",
+                        "block_transition_if_unmet": true,
+                        "block_gen_if_met": true,
+                        "use_all_trials_in_exp": false,
+                        "continue_trial_generation": false,
+                        "count_only_trials_with_data": false,
+                        "__type": "MinTrials"
+                    }
+                ]
+            }
+        ],
+        "curr_node_name": "GenerationStep_0"
+    },
+    "_enforce_sequential_optimization": true
+}

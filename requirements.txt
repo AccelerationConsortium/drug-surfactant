@@ -1,2 +1,13 @@
-ax-platform>=1,<2
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.15.3
+matplotlib==3.10.0
+requests>=2.25.0
+python-dotenv
+opentrons==8.6.0
+opentrons_shared_data==8.6.0
+torch
+gpytorch==1.14
+botorch==0.14.0
+ax-platform>=1.0.0
 paho-mqtt>=2.1.0
