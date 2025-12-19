@@ -99,6 +99,18 @@ class OpenTronsAPI:
             # }
             ]
 
+    def get_absorbance_from_run(self, run_id: str) -> Dict[str, float]:
+        commands = self.get_run_commands(run_id).get("data", [])
+        for cmd in commands:
+            if cmd["commandType"] == "comment":
+                try:
+                    payload = json.loads(cmd["params"]["message"])
+                    if payload.get("type") == "absorbance":
+                        return payload["data"]
+                except Exception:
+                    continue
+        raise RuntimeError("No absorbance data found")
+
 
     def run_protocol_from_file(self, file_path: str) -> str:
         print(f"Uploading protocol: {file_path}")
@@ -131,4 +143,4 @@ class OpenTronsAPI:
         final_status = self.wait_for_run_completion(run_id)
 
         print(f"Run completed with status: {final_status}")
-        return final_status
+        return run_id, final_status

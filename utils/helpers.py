@@ -251,18 +251,6 @@ def process_absorbance(iteration, replicates=3, threshold=0.06):
     
     return pd.DataFrame(summary)
 
-
-def build_results(iteration, df_absorbance):
-    # 1. trial_index from df_design
-    df_design = pd.read_csv(f'{design_data_path}{iteration}.csv')
-    results = df_design.copy()
-
-    results['success'] = df_absorbance['success'] #if 'success' in df_absorbance.columns else 0
-
-    results['obj_surf_conc'] = np.where( results['success'] == 1, results['surf_conc'], surfactant_stock_conc )
-
-    return results
-
 def results_so_far (current_iteration):
 
     ax_client = AxClient.load_from_json_file(optimizer_file_path + str(current_iteration-1) + '_loaded.json')
@@ -488,6 +476,47 @@ def load_design_optimizer(iteration):
 
     return ax_client
 
+def absorbance_to_results_df(
+    absorbance: dict,
+    surf_conc_per_trial: list,
+    replicates: int = 3,
+    threshold: float = 0.06,
+    fallback_surf_conc: float = None,
+):
+
+    # 1) enforce A1→H12 row-major order
+    ordered_vals = []
+    for row in "ABCDEFGH":
+        for col in range(1, 13):
+            well = f"{row}{col}"
+            if well in absorbance:
+                ordered_vals.append(absorbance[well])
+
+    arr = np.array(ordered_vals)
+
+    # 2) binarize absorbance
+    binary = (arr < threshold).astype(int)
+
+    # 3) chunk into trials
+    n_trials = len(binary) // replicates
+    rows = []
+
+    for i in range(n_trials):
+        block = binary[i * replicates : (i + 1) * replicates]
+        success = block.all()
+
+        surf_conc = surf_conc_per_trial[i]
+
+        obj_surf_conc = (
+            surf_conc if success else fallback_surf_conc
+        )
+
+        rows.append({
+            "trial_index": i,
+            "obj_surf_conc": obj_surf_conc
+        })
+
+    return pd.DataFrame(rows)
 
 def load_data_to_optimizer(iteration, results):
     

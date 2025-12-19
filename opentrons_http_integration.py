@@ -66,7 +66,7 @@ def run_automated_experiment_cycle(api):
         # Run experiment on robot via HTTP API
         print("Starting experiment on OpenTrons robot...")
         try:
-            status = api.run_protocol_from_file(protocol_path)
+            run_id, status = api.run_protocol_from_file(protocol_path)
 
             if status == "succeeded":
                 print("Experiment completed successfully!")
@@ -78,6 +78,19 @@ def run_automated_experiment_cycle(api):
         except Exception as e:
             print(f"Robot communication failed: {e}")
             return False
+        
+        # Processing logic
+        absorbance = api.get_absorbance_from_run(run_id)
+        results_df = hf.absorbance_to_results_df(
+            absorbance=absorbance,
+            surf_conc_per_trial=surf_concs,
+            replicates=3,
+            threshold=0.06,
+            fallback_surf_conc=surfactant_stock_conc
+        )
+
+        ax_client = hf.load_data_to_optimizer(i, results_df)
+        
 
 
 if __name__ == "__main__":

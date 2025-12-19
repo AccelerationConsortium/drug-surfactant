@@ -133,8 +133,13 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(labware=labware_to_read, new_location= pr_mod, use_gripper=True)
         pr_mod.close_lid()
         pr_data = pr_mod.read()
-        pr_data[600]["A1"]
-        pr_data = pr_mod.read(export_filename="raw_absorbance_in") #CSV file
+        protocol.comment(
+            json.dumps({
+                "type": "absorbance",
+                "wavelength": 600,
+                "data": pr_data[600]
+            })
+        )
         pr_mod.open_lid()
         protocol.move_labware(labware=labware_to_read, new_location= new_location, use_gripper=True)
 
