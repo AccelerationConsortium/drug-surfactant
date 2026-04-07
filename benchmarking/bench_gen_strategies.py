@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 utils.set_seeds(0)  # setting the random seed for reproducibility
 
 seed_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-obj1_name = 'ackley'
+obj1_name = 'rosenbrock'
 
 models_list = [Generators.SAASBO, Generators.BO_MIXED, Generators.BOTORCH_MODULAR] # BO_MIXED is new name for GPEI in Ax 1.0.0
 
@@ -47,8 +47,20 @@ for j, seed in enumerate(seed_list):
 
         ax_client.create_experiment(
             parameters=[
-                {"name": "x1", "type": "range", "bounds": [-32.768, 32.768]},
-                {"name": "x2", "type": "range", "bounds": [-32.768, 32.768]},
+                {"name": "x1", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x2", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x3", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x4", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x5", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x6", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x7", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x8", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x9", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x10", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x11", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x12", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x13", "type": "range", "bounds": [-2.0, 2.0]},
+                {"name": "x14", "type": "range", "bounds": [-2.0, 2.0]},
                 ],
             objectives={
                 obj1_name: ObjectiveProperties(minimize=True),
@@ -58,17 +70,16 @@ for j, seed in enumerate(seed_list):
         for _ in range(20):
             parameterization, trial_index = ax_client.get_next_trial()
 
-            x1 = parameterization["x1"]
-            x2 = parameterization["x2"]
+            x = np.array([parameterization[f"x{i+1}"] for i in range(14)])
 
-            results = utils.ackley(x1, x2)
+            results = utils.noisy_rosenbrock(x)
             ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
         traces[i][seed, :] = get_trace(ax_client._experiment)
         print(traces[i][seed, :], "for model:", i, "seed:", seed)
     
     # plot for each seed
-    objective = 'ackley'
+    objective = 'rosenbrock'
     
     fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 
@@ -86,11 +97,11 @@ for j, seed in enumerate(seed_list):
     ax.set_xlabel("Trial Number")
     ax.set_ylabel(objective)
     ax.legend()
-    plt.savefig("benchmarking/gen_strategy_bench_seed{}.png".format(seed), dpi=150)
+    plt.savefig("benchmarking/14_parameter_benches/rosenbrock/gen_strategy_bench_rosen14D_seed{}.png".format(seed), dpi=150)
 
 
 # plot everything together
-objective = 'ackley'
+objective = 'rosenbrock'
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 
@@ -113,4 +124,4 @@ ax.axvline(3, color='black', linestyle='--') # mark end of SOBOL trials
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objective)
 ax.legend()
-plt.savefig("benchmarking/gen_strategy_bench_mean_and_std.png", dpi=150)
+plt.savefig("benchmarking/14_parameter_benches/rosenbrock/gen_strategy_bench_rosen14D_mean_and_std.png", dpi=150)
