@@ -28,7 +28,7 @@ ipykernel==6.29.5
 #  prebuilt wheels or change behaviour)
 appnope==0.1.4; sys_platform == "darwin"
 asttokens==3.0.0
-certifi==2024.8.30
+certifi==2026.10.18
 charset-normalizer==3.4.0
 cloudpickle==3.1.1
 comm==0.2.2
