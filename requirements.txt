@@ -6,7 +6,7 @@
 ax-platform==0.4.3
 botorch==0.12.0
 gpytorch==1.13
-torch==2.1.0
+torch==2.13.0
 
 # Numerics / data handling
 numpy==1.26.4
