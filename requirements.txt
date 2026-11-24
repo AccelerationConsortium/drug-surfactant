@@ -15,7 +15,7 @@ scipy==1.14.1
 scikit-learn==1.6.1
 
 # Robot communication
-requests==2.32.3
+requests==2.33.0
 
 # Data analysis & figures (data_analysis/)
 matplotlib==3.9.4
