@@ -1,0 +1,12 @@
+# Reproducible conda environment for the drug-surfactant SDL.
+# Create with:   conda env create -f environment.yml
+# Activate with: conda activate drug-surfactant
+name: drug-surfactant
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.16
+  - tk            # required by the Tkinter launcher GUI
+  - pip
+  - pip:
+      - -r requirements.txt
