@@ -73,7 +73,7 @@ prompt_toolkit==3.0.48
 psutil==6.1.0
 ptyprocess==0.7.0; sys_platform != "win32"
 pure_eval==0.2.3
-Pygments==2.18.0
+Pygments==2.20.0
 pyparsing==3.2.0
 pyre-extensions==0.0.32
 pyro-api==0.1.2
