@@ -40,7 +40,7 @@ exceptiongroup==1.2.2
 executing==2.1.0
 filelock==3.16.1
 fonttools==4.55.3
-fsspec==2024.10.0
+fsspec==2026.6.0
 idna==3.10
 ipython==8.30.0
 ipywidgets==8.1.5
